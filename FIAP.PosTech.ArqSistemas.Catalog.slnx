@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="FIAP.PosTech.ArqSistemas.CatalogAPI/FIAP.PosTech.ArqSistemas.CatalogAPI.csproj" />
+  <Project Path="FIAP.PosTech.ArqSistemas.CatalogWS/FIAP.PosTech.ArqSistemas.CatalogWS.csproj" />
+</Solution>
