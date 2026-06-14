@@ -1,13 +1,13 @@
 ﻿namespace FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs
 {
-    public class CriarCatalogDto
+    public class CriarGameDto
     {
         public string Nome { get; set; }
         public decimal Preco { get; set; }
         public bool Ativo { get; set; }
     }
 
-    public class AtualizarCatalogDto
+    public class AtualizarGameDto
     {
         public string? Nome { get; set; }
         public decimal? Preco { get; set; }

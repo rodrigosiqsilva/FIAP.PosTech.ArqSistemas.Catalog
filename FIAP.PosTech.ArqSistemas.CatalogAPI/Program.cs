@@ -20,7 +20,7 @@ builder.Logging.AddDebug();
 builder.Services.AddControllers();
 
 // Register Usuario Service
-builder.Services.AddSingleton<ICatalogService, CatalogService>();
+builder.Services.AddSingleton<IGameService, GameService>();
 
 // Configure OpenAPI/Swagger using Swashbuckle
 builder.Services.AddEndpointsApiExplorer();

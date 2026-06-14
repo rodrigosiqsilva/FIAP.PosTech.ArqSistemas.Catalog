@@ -8,14 +8,14 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CatalogController : ControllerBase
+    public class GameController : ControllerBase
     {
-        private readonly ICatalogService _catalogService;
-        private readonly ILogger<CatalogController> _logger;
+        private readonly IGameService _gameService;
+        private readonly ILogger<GameController> _logger;
 
-        public CatalogController(ICatalogService catalogService, ILogger<CatalogController> logger )
+        public GameController(IGameService gameService, ILogger<GameController> logger )
         {
-            _catalogService = catalogService;
+            _gameService = gameService;
             _logger = logger;
         }
 
@@ -30,168 +30,168 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
         /// <returns>Lista de todos os catálogos</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<ApiResponse<List<Catalog>>> ObterTodos()
+        public ActionResult<ApiResponse<List<Game>>> ObterTodos()
         {
             try
             {
-                var catalogs = _catalogService.ObterTodos();
-                var response = ApiResponse<List<Catalog>>.SucessoList(catalogs, $"Total de {catalogs.Count} catálogos encontrados");
+                var games = _gameService.ObterTodos();
+                var response = ApiResponse<List<Game>>.SucessoList(games, $"Total de {games.Count} jogos encontrados");
                 response.CorrelationId = GetCorrelationId();
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter todos os catálogos");
-                var response = ApiResponse<List<Catalog>>.Erro(ex.Message, "Erro ao obter catálogos");
+                _logger.LogError(ex, "Erro ao obter todos os jogos");
+                var response = ApiResponse<List<Game>>.Erro(ex.Message, "Erro ao obter jogos");
                 response.CorrelationId = GetCorrelationId();
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
         }
 
         /// <summary>
-        /// Obtém um catálogo pelo Id
+        /// Obtém um jogo pelo Id
         /// </summary>
-        /// <param name="id">Id do catálogo</param>
-        /// <returns>Catálogo encontrado</returns>
+        /// <param name="id">Id do jogo</param>
+        /// <returns>Jogo encontrado</returns>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]       
-        public ActionResult<ApiResponse<Catalog>> ObterPorId(int id)
+        public ActionResult<ApiResponse<Game>> ObterPorId(int id)
         {
             try
             {
                 if (id <= 0)
                 {
-                    var errorResponse = ApiResponse<Catalog>.Erro("Id deve ser um número positivo", "Validação falhou");
+                    var errorResponse = ApiResponse<Game>.Erro("Id deve ser um número positivo", "Validação falhou");
                     errorResponse.CorrelationId = GetCorrelationId();
                     return BadRequest(errorResponse);
                 }
 
-                var catalog = _catalogService.ObterPorId(id);
+                var game = _gameService.ObterPorId(id);
 
-                if (catalog == null)
+                if (game == null)
                 {
-                    var notFoundResponse = ApiResponse<Catalog>.NotFound($"Catálogo com Id {id} não encontrado");
+                    var notFoundResponse = ApiResponse<Game>.NotFound($"Jogo com Id {id} não encontrado");
                     notFoundResponse.CorrelationId = GetCorrelationId();
                     return NotFound(notFoundResponse);
                 }
 
-                var response = ApiResponse<Catalog>.SucessoOk(catalog, "Catálogo encontrado com sucesso");
+                var response = ApiResponse<Game>.SucessoOk(game, "Jogo encontrado com sucesso");
                 response.CorrelationId = GetCorrelationId();
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter catálogo com Id {Id}", id);
-                var response = ApiResponse<Catalog>.Erro(ex.Message, "Erro ao obter catálogo");
+                _logger.LogError(ex, "Erro ao obter jogo com Id {Id}", id);
+                var response = ApiResponse<Game>.Erro(ex.Message, "Erro ao obter jogo");
                 response.CorrelationId = GetCorrelationId();
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
         }
 
         /// <summary>
-        /// Cria um novo catálogo
+        /// Cria um novo jogo
         /// </summary>
-        /// <param name="catalog">Dados do catálogo a ser criado (não incluir Id)</param>
-        /// <returns>Catálogo criado com Id gerado automaticamente</returns>
+        /// <param name="game">Dados do jogo a ser criado (não incluir Id)</param>
+        /// <returns>Jogo criado com Id gerado automaticamente</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<ApiResponse<Catalog>> Criar([FromBody] Catalog catalog)
+        public ActionResult<ApiResponse<Game>> Criar([FromBody] Game game)
         {
             try
             {
-                if (catalog == null)
+                if (game == null)
                 {
-                    var errorResponse = ApiResponse<Catalog>.Erro("Corpo da requisição não pode estar vazio", "Validação falhou");
+                    var errorResponse = ApiResponse<Game>.Erro("Corpo da requisição não pode estar vazio", "Validação falhou");
                     errorResponse.CorrelationId = GetCorrelationId();
                     return BadRequest(errorResponse);
                 }
 
-                var (sucesso, mensagem, catalogCriado) = _catalogService.Criar(catalog);
+                var (sucesso, mensagem, gameCriado) = _gameService.Criar(game);
 
                 if (!sucesso)
                 {
-                    var errorResponse = ApiResponse<Catalog>.Erro(mensagem, "Erro ao criar catálogo");
+                    var errorResponse = ApiResponse<Game>.Erro(mensagem, "Erro ao criar jogo");
                     errorResponse.CorrelationId = GetCorrelationId();
                     return BadRequest(errorResponse);
                 }
 
-                var response = ApiResponse<Catalog>.SucessoCreate(catalogCriado, mensagem);
+                var response = ApiResponse<Game>.SucessoCreate(gameCriado, mensagem);
                 response.CorrelationId = GetCorrelationId();
 
-                return CreatedAtAction(nameof(ObterPorId), new { id = catalogCriado.Id }, response);
+                return CreatedAtAction(nameof(ObterPorId), new { id = gameCriado.Id }, response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao criar catálogo");
-                var response = ApiResponse<Catalog>.Erro(ex.Message, "Erro ao criar catálogo");
+                _logger.LogError(ex, "Erro ao criar jogo");
+                var response = ApiResponse<Game>.Erro(ex.Message, "Erro ao criar jogo");
                 response.CorrelationId = GetCorrelationId();
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
         }
 
         /// <summary>
-        /// Altera um catálogo existente (partial update)
+        /// Altera um jogo existente (partial update)
         /// </summary>
-        /// <param name="id">Id do catálogo a ser alterado (obrigatório)</param>
-        /// <param name="catalogAtualizado">Dados a serem atualizados. Todos os campos são opcionais - apenas os fornecidos serão alterados.</param>
-        /// <returns>Catálogo alterado</returns>
+        /// <param name="id">Id do jogo a ser alterado (obrigatório)</param>
+        /// <param name="gameAtualizado">Dados a serem atualizados. Todos os campos são opcionais - apenas os fornecidos serão alterados.</param>
+        /// <returns>Jogo alterado</returns>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<ApiResponse<Catalog>> Alterar(int id, [FromBody] AtualizarCatalogDto catalogAtualizado)
+        public ActionResult<ApiResponse<Game>> Alterar(int id, [FromBody] AtualizarGameDto gameAtualizado)
         {
             try
             {
-                if (catalogAtualizado == null)
+                if (gameAtualizado == null)
                 {
-                    var errorResponse = ApiResponse<Catalog>.Erro("Corpo da requisição não pode estar vazio", "Validação falhou");
+                    var errorResponse = ApiResponse<Game>.Erro("Corpo da requisição não pode estar vazio", "Validação falhou");
                     errorResponse.CorrelationId = GetCorrelationId();
                     return BadRequest(errorResponse);
                 }
 
                 if (id <= 0)
                 {
-                    var errorResponse = ApiResponse<Catalog>.Erro("Id deve ser um número positivo", "Validação falhou");
+                    var errorResponse = ApiResponse<Game>.Erro("Id deve ser um número positivo", "Validação falhou");
                     errorResponse.CorrelationId = GetCorrelationId();
                     return BadRequest(errorResponse);
                 }
 
-                var (sucesso, mensagem, catalogAlterado) = _catalogService.Alterar(id, catalogAtualizado);
+                var (sucesso, mensagem, gameAlterado) = _gameService.Alterar(id, gameAtualizado);
 
                 if (!sucesso)
                 {
-                    if (mensagem == "Catálogo não encontrado")
+                    if (mensagem == "Jogo não encontrado")
                     {
-                        var notFoundResponse = ApiResponse<Catalog>.NotFound(mensagem);
+                        var notFoundResponse = ApiResponse<Game>.NotFound(mensagem);
                         notFoundResponse.CorrelationId = GetCorrelationId();
                         return NotFound(notFoundResponse);
                     }
 
-                    var errorResponse = ApiResponse<Catalog>.Erro(mensagem, "Erro ao alterar catálogo");
+                    var errorResponse = ApiResponse<Game>.Erro(mensagem, "Erro ao alterar jogo");
                     errorResponse.CorrelationId = GetCorrelationId();
                     return BadRequest(errorResponse);
                 }
 
-                var response = ApiResponse<Catalog>.SucessoOk(catalogAlterado, mensagem);
+                var response = ApiResponse<Game>.SucessoOk(gameAlterado, mensagem);
                 response.CorrelationId = GetCorrelationId();
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao alterar catálogo com Id {Id}", id);
-                var response = ApiResponse<Catalog>.Erro(ex.Message, "Erro ao alterar catálogo");
+                _logger.LogError(ex, "Erro ao alterar jogo com Id {Id}", id);
+                var response = ApiResponse<Game>.Erro(ex.Message, "Erro ao alterar jogo");
                 response.CorrelationId = GetCorrelationId();
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
         }
 
         /// <summary>
-        /// Exclui um catálogo existente
+        /// Exclui um jogo existente
         /// </summary>
-        /// <param name="id">Id do catálogo a ser excluído (obrigatório)</param>
+        /// <param name="id">Id do jogo a ser excluído (obrigatório)</param>
         /// <returns>Resultado da exclusão</returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -208,18 +208,18 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
                     return BadRequest(errorResponse);
                 }
 
-                var (sucesso, mensagem) = _catalogService.Excluir(id);
+                var (sucesso, mensagem) = _gameService.Excluir(id);
 
                 if (!sucesso)
                 {
-                    if (mensagem == "Catálogo não encontrado")
+                    if (mensagem == "Jogo não encontrado")
                     {
                         var notFoundResponse = ApiResponse<object?>.NotFound(mensagem);
                         notFoundResponse.CorrelationId = GetCorrelationId();
                         return NotFound(notFoundResponse);
                     }
 
-                    var errorResponse = ApiResponse<object?>.Erro(mensagem, "Erro ao excluir catálogo");
+                    var errorResponse = ApiResponse<object?>.Erro(mensagem, "Erro ao excluir jogo");
                     errorResponse.CorrelationId = GetCorrelationId();
                     return BadRequest(errorResponse);
                 }
@@ -230,8 +230,8 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao excluir catálogo com Id {Id}", id);
-                var response = ApiResponse<object?>.Erro(ex.Message, "Erro ao excluir catálogo");
+                _logger.LogError(ex, "Erro ao excluir jogo com Id {Id}", id);
+                var response = ApiResponse<object?>.Erro(ex.Message, "Erro ao excluir jogo");
                 response.CorrelationId = GetCorrelationId();
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }

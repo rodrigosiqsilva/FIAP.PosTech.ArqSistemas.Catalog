@@ -3,28 +3,28 @@ using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
 {
-    public interface ICatalogService
+    public interface IGameService
     {
         /// <summary>
         /// Obtém todos os usuários
         /// </summary>
-        List<Catalog> ObterTodos();
+        List<Game> ObterTodos();
 
         /// <summary>
         /// Obtém um usuário pelo Id
         /// </summary>
-        Catalog ObterPorId(int id);
+        Game ObterPorId(int id);
 
         /// <summary>
         /// Cria um novo usuário
         /// </summary>
-        (bool Sucesso, string Mensagem, Catalog Catalog) Criar(Catalog catalog);
+        (bool Sucesso, string Mensagem, Game Game) Criar(Game game);
 
         /// <summary>
         /// Altera um usuário existente (partial update)
         /// Apenas o Id é obrigatório. Os demais campos são opcionais e serão atualizados somente se fornecidos.
         /// </summary>
-        (bool Sucesso, string Mensagem, Catalog Catalog) Alterar(int id, AtualizarCatalogDto catalogAtualizado);
+        (bool Sucesso, string Mensagem, Game Game) Alterar(int id, AtualizarGameDto gameAtualizado);
 
         /// <summary>
         /// Exclui um usuário pelo Id
