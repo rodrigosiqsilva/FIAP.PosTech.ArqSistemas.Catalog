@@ -8,6 +8,7 @@
     using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
+    using FIAP.PosTech.ArqSistemas.UserAPI.Models;
 
     public class UserService : IUserService
     {
@@ -20,7 +21,7 @@
             _configuration = configuration;
         }
 
-        public async Task<bool> GetUserAsync(int userId)
+        public async Task<User> GetUserAsync(int userId)
         {
             // 1. Resgata os valores do appsettings.json
             var baseUrl = _configuration["ApiSettings:BaseUrl"];
@@ -59,14 +60,14 @@
             // Verifica se o usuário não foi encontrado
             if (userResponse.StatusCode == HttpStatusCode.NotFound)
             {
-                return false;
+                return null;
             }
 
             userResponse.EnsureSuccessStatusCode();
 
             // Retorna o JSON do usuário como string
             // return await userResponse.Content.ReadAsStringAsync();
-            return true;
+            return await userResponse.Content.ReadFromJsonAsync<User>();
         }
     }
 

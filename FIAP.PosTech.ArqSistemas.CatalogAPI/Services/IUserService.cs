@@ -1,9 +1,9 @@
 ﻿namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
 {
-    using System.Threading.Tasks;
+    using FIAP.PosTech.ArqSistemas.UserAPI.Models;
 
     public interface IUserService
     {
-        Task<bool> GetUserAsync(int userId);
+        Task<User> GetUserAsync(int userId);
     }
 }

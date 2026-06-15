@@ -1,9 +1,14 @@
-﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
+﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs;
+using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Services;
+using FIAP.PosTech.ArqSistemas.UserAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
 {
+
+    [Route("api/[controller]")]
+    [ApiController]
     public class OrderController : ControllerBase
     {
 
@@ -11,14 +16,16 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
         private readonly IUserService _userService;
         private readonly IGameService _gameService;
         private readonly ILogger<OrderController> _logger;
+        private readonly IOrderPlacedService _orderPlacedService;
 
         public OrderController(IOrderGameService orderGameService, ILogger<OrderController> logger, 
-            IGameService gameService, IUserService userService)
+            IGameService gameService, IUserService userService, IOrderPlacedService orderPlacedService)
         {
             _orderGameService = orderGameService;
             _logger = logger;
             _gameService = gameService;
             _userService = userService;
+            _orderPlacedService = orderPlacedService;
         }
 
         /// <summary>
@@ -76,6 +83,7 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<Order>>> Criar([FromBody] Order order)
         {
             try
@@ -114,6 +122,19 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
 
                 var response = ApiResponse<Order>.SucessoCreate(orderCriado, mensagem);
                 response.CorrelationId = GetCorrelationId();
+
+                var orderCriadoDetalhe = new OrderDto
+                {
+                    Id = orderCriado.Id,
+                    IdUser = orderCriado.UserId,
+                    Usuario = userJson.Nome,
+                    IdGame = orderCriado.GameId,
+                    Game = gameJson.Nome,
+                    Preco = orderCriado.Price,
+                    EmailUser = userJson.Email
+                };
+
+                _orderPlacedService.SendNotificationUser(orderCriadoDetalhe, GetCorrelationId());
 
                 return CreatedAtAction(nameof(ObterPorId), new { id = orderCriado.Id }, response);
             }
