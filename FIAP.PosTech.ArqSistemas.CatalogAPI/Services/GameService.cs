@@ -40,18 +40,18 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
             return _game.ToList();
         }
 
-        public Game ObterPorId(int id)
+        public async Task<Game> ObterPorId(int id)
         {
-            var catalog = _game.FirstOrDefault(c => c.Id == id);
-            if (catalog == null)
+            var game = _game.FirstOrDefault(c => c.Id == id);
+            if (game == null)
             {
                 _logger.LogWarning("Jogo com Id {Id} não encontrado", id);
             }
             else
             {
-                _logger.LogInformation("Jogo com Id {Id} encontrado: {Nome}", id, catalog.Nome);
+                _logger.LogInformation("Jogo com Id {Id} encontrado: {Nome}", id, game.Nome);
             }
-            return catalog;
+            return game;
         }
 
         public (bool Sucesso, string Mensagem, Game Game) Criar(Game game)
@@ -73,7 +73,7 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
             }
 
             // Criar novo jogo com Id gerado
-            var novoCatalog = new Game
+            var novoGame = new Game
             {
                 Id = _proximoId++,
                 Nome = game.Nome.Trim(),
@@ -81,11 +81,11 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
                 Ativo = game.Ativo   
             };
 
-            _game.Add(novoCatalog);
-            _logger.LogInformation("Catálogo criado com sucesso. Id: {Id}, Nome: {Nome}, Preco: {Preco}",
-                novoCatalog.Id, novoCatalog.Nome, novoCatalog.Preco);
+            _game.Add(novoGame);
+            _logger.LogInformation("Jogo criado com sucesso. Id: {Id}, Nome: {Nome}, Preco: {Preco}",
+                novoGame.Id, novoGame.Nome, novoGame.Preco);
 
-            return (true, "Catálogo criado com sucesso", novoCatalog);
+            return (true, "Jogo criado com sucesso", novoGame);
         }
 
         public (bool Sucesso, string Mensagem, Game Game) Alterar(int id, AtualizarGameDto gameAtualizado)

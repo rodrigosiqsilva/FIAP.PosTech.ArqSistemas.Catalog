@@ -13,7 +13,7 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
         /// <summary>
         /// Obtém um usuário pelo Id
         /// </summary>
-        Game ObterPorId(int id);
+        Task<Game> ObterPorId(int id);
 
         /// <summary>
         /// Cria um novo usuário

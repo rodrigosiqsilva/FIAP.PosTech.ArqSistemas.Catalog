@@ -25,9 +25,9 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
         private string? GetCorrelationId() => HttpContext.Items["CorrelationId"]?.ToString();
 
         /// <summary>
-        /// Obtém todos os catálogos
+        /// Obtém todos os jogos
         /// </summary>
-        /// <returns>Lista de todos os catálogos</returns>
+        /// <returns>Lista de todos os jogos</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<ApiResponse<List<Game>>> ObterTodos()
@@ -56,7 +56,7 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]       
-        public ActionResult<ApiResponse<Game>> ObterPorId(int id)
+        public async Task<ActionResult<ApiResponse<Game>>> ObterPorId(int id)
         {
             try
             {
@@ -67,7 +67,7 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
                     return BadRequest(errorResponse);
                 }
 
-                var game = _gameService.ObterPorId(id);
+                var game = await _gameService.ObterPorId(id);
 
                 if (game == null)
                 {

@@ -1,6 +1,45 @@
-@FIAP.PosTech.ArqSistemas.CatalogAPI_HostAddress = http://localhost:5024
+// Guia de Testes CRUD para API de Catalog
+// Todas as requisições incluem o header X-Correlation-Id (gerado automaticamente se não fornecido)
 
-GET {{FIAP.PosTech.ArqSistemas.CatalogAPI_HostAddress}}/weatherforecast/
-Accept: application/json
+@HostAddress = https://localhost:7094
+
+### 1. OBTER TODOS OS GAMES
+GET {{HostAddress}}/api/game
+X-Correlation-Id: test-001
 
 ###
+// 2. OBTER GAME POR ID 
+GET {{HostAddress}}/api/game/1
+X-Correlation-Id: test-002
+
+###
+// 3. CRIAR NOVO GAME
+// Requisitos: Nome, Descrição, Preço (todos obrigatórios)
+// Preço: valor positivo
+POST {{HostAddress}}/api/game
+Content-Type: application/json
+X-Correlation-Id: test-003
+{
+  "nome": " Free Fire",
+  "preco": 59.99,
+  "ativo": true
+}
+
+###
+// 4. ATUALIZAR GAME
+// Requisitos: Id na URL (obrigatório), todos os campos no corpo (nome, descricao, preco)
+// As mesmas regras de validação se aplicam
+PUT {{HostAddress}}/api/game/1
+Content-Type: application/json
+X-Correlation-Id: test-004
+{
+  "nome": "Free Fire Atualizado",
+  "preco": 49.99,
+  "ativo": false
+}
+
+###
+// 5. EXCLUIR GAME
+// Requisitos: Apenas Id necessário (na URL)
+DELETE {{HostAddress}}/api/game/1
+X-Correlation-Id: test-005

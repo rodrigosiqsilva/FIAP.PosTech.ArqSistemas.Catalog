@@ -21,6 +21,8 @@ builder.Services.AddControllers();
 
 // Register Usuario Service
 builder.Services.AddSingleton<IGameService, GameService>();
+builder.Services.AddSingleton<IOrderGameService, OrderGameService>();
+builder.Services.AddHttpClient<IUserService, UserService>();
 
 // Configure OpenAPI/Swagger using Swashbuckle
 builder.Services.AddEndpointsApiExplorer();
