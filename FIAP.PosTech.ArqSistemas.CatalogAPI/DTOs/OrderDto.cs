@@ -1,4 +1,6 @@
-﻿namespace FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs
+﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.Enums;
+
+namespace FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs
 {
     public class OrderDto
     {
@@ -9,5 +11,6 @@
         public string Game { get; set; }
         public decimal Preco { get; set; }
         public string EmailUser { get; set; }
+        public OrderStatus Status { get; set; } = OrderStatus.Rejected;
     }
 }

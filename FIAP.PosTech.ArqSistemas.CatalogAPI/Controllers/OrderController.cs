@@ -131,7 +131,8 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
                     IdGame = orderCriado.GameId,
                     Game = gameJson.Nome,
                     Preco = orderCriado.Price,
-                    EmailUser = userJson.Email
+                    EmailUser = userJson.Email,
+                    Status = orderCriado.Status
                 };
 
                 _orderPlacedService.SendNotificationUser(orderCriadoDetalhe, GetCorrelationId());
