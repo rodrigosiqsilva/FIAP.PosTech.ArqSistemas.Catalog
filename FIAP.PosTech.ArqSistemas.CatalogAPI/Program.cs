@@ -17,7 +17,7 @@ builder.Services.AddControllers();
 // e conflito com o HttpClient (Transient/Scoped)
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IOrderGameService, OrderGameService>();
-builder.Services.AddScoped<IOrderPlacedService, OrderPlacedService>();
+builder.Services.AddSingleton<IOrderPlacedService, OrderPlacedService>();
 
 // Configura o HttpClient corretamente como Scoped/Transient por trás dos panos
 builder.Services.AddHttpClient<IUserService, UserService>();
