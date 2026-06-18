@@ -100,7 +100,9 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
 
                 if (userJson == null)
                 {
-                    return NotFound(new { mensagem = $"Usuário com ID {order.UserId} não foi encontrado na API de origem." });
+                    var responseUser = ApiResponse<Order>.Erro("Usuário não existe");
+                    responseUser.CorrelationId = GetCorrelationId();
+                    return StatusCode(StatusCodes.Status404NotFound, responseUser);
                 }
 
                 // Jogo existe
@@ -108,7 +110,9 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
 
                 if (gameJson == null)
                 {
-                    return NotFound(new { mensagem = $"Jogo com ID {order.GameId} não foi encontrado na API de origem." });
+                    var responseJogo = ApiResponse<Order>.Erro("Jogo não existe");
+                    responseJogo.CorrelationId = GetCorrelationId();
+                    return StatusCode(StatusCodes.Status404NotFound, responseJogo);
                 }
 
                 var (sucesso, mensagem, orderCriado) = _orderGameService.Criar(order);

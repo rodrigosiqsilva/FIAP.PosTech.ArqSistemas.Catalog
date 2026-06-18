@@ -1,15 +1,9 @@
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Middlewares;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Services;
-using Microsoft.IdentityModel.Tokens;
+using FIAP.PosTech.ArqSistemas.UserAPI.Services;
 using Microsoft.OpenApi;
-using System.Text;
-
 
 var builder = WebApplication.CreateBuilder(args);
-
-var configuration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json")
-    .Build();
 
 // Configurar logging estruturado
 builder.Logging.ClearProviders();
@@ -19,16 +13,20 @@ builder.Logging.AddDebug();
 // Add services to the container.
 builder.Services.AddControllers();
 
-// Register Usuario Service
-builder.Services.AddSingleton<IGameService, GameService>();
-builder.Services.AddSingleton<IOrderGameService, OrderGameService>();
+// CORREÇÃO: Mudado de Singleton para Scoped para evitar problemas de concorrência 
+// e conflito com o HttpClient (Transient/Scoped)
+builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IOrderGameService, OrderGameService>();
+builder.Services.AddScoped<IOrderPlacedService, OrderPlacedService>();
+
+// Configura o HttpClient corretamente como Scoped/Transient por trás dos panos
 builder.Services.AddHttpClient<IUserService, UserService>();
 
-// Configure OpenAPI/Swagger using Swashbuckle
+// Configure OpenAPI/Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
+    c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "FIAP Cloud Games (FCG)",
         Version = "v1",
@@ -44,17 +42,19 @@ builder.Services.AddSwaggerGen(c =>
             Url = new Uri("https://opensource.org/licenses/MIT")
         }
     });
-}
-
-);
-
-
+});
 
 var app = builder.Build();
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-// Configure the HTTP request pipeline.
+// CORREÇÃO: Ordem correta do pipeline do ASP.NET Core
+app.UseHttpsRedirection();
+
+app.UseRouting(); // Importante para o Swagger e Controllers se acharem
+
+app.UseCorrelationId(); // Seu middleware personalizado
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -62,13 +62,10 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
-app.UseCorrelationId();
-
-app.UseHttpsRedirection();
+app.UseAuthorization();
 
 app.MapControllers();
 
-// Log ao iniciar a aplicação
 logger.LogInformation("Iniciando aplicação FIAP Cloud Games (FCG)");
 
 try
@@ -79,4 +76,3 @@ catch (Exception ex)
 {
     logger.LogCritical(ex, "Aplicação encerrada com erro");
 }
-
