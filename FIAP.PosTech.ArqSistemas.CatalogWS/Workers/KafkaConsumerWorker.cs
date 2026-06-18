@@ -11,7 +11,6 @@ namespace FIAP.PosTech.ArqSistemas.CatalogWS.Workers
         public KafkaConsumerWorker(IConfiguration configuration, IOrderGameService orderGameService)
         {
             var bootstrapServers = configuration["KafkaConfig:BootstrapServers"];
-            var topicNameUserCreated = configuration["KafkaConfig:TopicNameUserCreated"];
             var topicNamePaymentProcessed = configuration["KafkaConfig:TopicNamePaymentProcessed"];
             var groupId = configuration["KafkaConfig:GroupId"];
 
