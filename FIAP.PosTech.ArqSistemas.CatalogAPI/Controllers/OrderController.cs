@@ -131,11 +131,11 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
                 {
                     Id = orderCriado.Id,
                     IdUser = orderCriado.UserId,
-                    Usuario = userJson.Nome,
+                    Usuario = userJson.Dados.Nome,
                     IdGame = orderCriado.GameId,
                     Game = gameJson.Nome,
                     Preco = orderCriado.Price,
-                    EmailUser = userJson.Email,
+                    EmailUser = userJson.Dados.Email,
                     Status = orderCriado.Status
                 };
 

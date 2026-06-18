@@ -1,5 +1,8 @@
 ﻿namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
 {
+    using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
+    using FIAP.PosTech.ArqSistemas.UserAPI.Models;
+    using Microsoft.Extensions.Configuration;
     using System;
     using System.Net;
     using System.Net.Http;
@@ -7,8 +10,6 @@
     using System.Net.Http.Json;
     using System.Text.Json.Serialization;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Configuration;
-    using FIAP.PosTech.ArqSistemas.UserAPI.Models;
 
     public class UserService : IUserService
     {
@@ -21,7 +22,7 @@
             _configuration = configuration;
         }
 
-        public async Task<User> GetUserAsync(int userId)
+        public async Task<ApiResponse<User>> GetUserAsync(int userId)
         {
             // 1. Resgata os valores do appsettings.json
             var baseUrl = _configuration["ApiSettings:BaseUrl"];
@@ -67,7 +68,7 @@
 
             // Retorna o JSON do usuário como string
             // return await userResponse.Content.ReadAsStringAsync();
-            return await userResponse.Content.ReadFromJsonAsync<User>();
+            return await userResponse.Content.ReadFromJsonAsync<ApiResponse<User>>();
         }
     }
 
