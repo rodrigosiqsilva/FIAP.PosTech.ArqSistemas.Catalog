@@ -1,5 +1,8 @@
 ﻿using Confluent.Kafka;
 using System.Text.Json;
+using FIAP.PosTech.ArqSistemas.CatalogWS.DTOs;
+using FIAP.PosTech.ArqSistemas.CatalogWS.Services;
+
 
 namespace FIAP.PosTech.ArqSistemas.CatalogWS.Events
 {
@@ -65,16 +68,14 @@ namespace FIAP.PosTech.ArqSistemas.CatalogWS.Events
 
                                     Console.WriteLine($"[Kafka] Novo pedido recebido! Usuário: {nome} | Jogo: {game} | Preço: {preco}");
 
-                                    var order = _orderGameService.ObterPorId(id);
+                                    var order = await _orderGameService.GetOrderAsync(id);
 
                                     if (order == null)
                                     {
                                         Console.WriteLine($"Não foi encontrado registro do pedido para registro de aprovação e disponibilizá-lo na biblioteca do usuário! Usuário: {nome} | Jogo: {game} | Preço: {preco}");
                                     }
-                                    else
-                                    {
-                                        order.Status = OrderStatus.Approved;
-                                    }
+
+                                    // Aprovar pedido e disponibilizar na biblioteca do usuário
                                 }
                             }
                         }

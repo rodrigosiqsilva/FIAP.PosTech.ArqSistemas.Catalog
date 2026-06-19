@@ -1,5 +1,6 @@
 ﻿
 using FIAP.PosTech.ArqSistemas.CatalogWS.Events;
+using FIAP.PosTech.ArqSistemas.CatalogWS.Services;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogWS.Workers
 {

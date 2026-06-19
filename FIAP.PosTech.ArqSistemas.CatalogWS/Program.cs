@@ -1,4 +1,4 @@
-using FIAP.PosTech.ArqSistemas.CatalogAPI.Services;
+using FIAP.PosTech.ArqSistemas.CatalogWS.Services;
 using FIAP.PosTech.ArqSistemas.CatalogWS.Workers;
 
 var builder = Host.CreateApplicationBuilder(args);
