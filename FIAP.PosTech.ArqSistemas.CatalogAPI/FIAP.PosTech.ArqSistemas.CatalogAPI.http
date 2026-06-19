@@ -43,3 +43,47 @@ X-Correlation-Id: test-004
 // Requisitos: Apenas Id necessário (na URL)
 DELETE {{HostAddress}}/api/game/1
 X-Correlation-Id: test-005
+
+
+###
+// 6. VENDER GAME 1
+POST {{HostAddress}}/api/order
+Content-Type: application/json
+X-Correlation-Id: test-006
+{
+  "id": 0,
+  "userId": 6,
+  "gameId": 1,
+  "price": 200,
+  "status": 0
+}
+
+###
+// 7. VENDER GAME 2
+POST {{HostAddress}}/api/order
+Content-Type: application/json
+X-Correlation-Id: test-007
+{
+  "id": 0,
+  "userId": 6,
+  "gameId": 2,
+  "price": 200,
+  "status": 0
+}
+
+###
+// 8. VENDER GAME 3
+POST {{HostAddress}}/api/order
+Content-Type: application/json
+X-Correlation-Id: test-008
+{
+  "id": 0,
+  "userId": 6,
+  "gameId": 3,
+  "price": 200,
+  "status": 0
+}
+
+
+
+

@@ -1,4 +1,5 @@
 ﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
+using FIAP.PosTech.ArqSistemas.CatalogAPI.Enums;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
 {
@@ -6,13 +7,12 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
     {
 
         private readonly ILogger<OrderGameService> _logger;
-        private int _proximoId = 1;
-        private readonly List<Order> _order;
+        private static int _proximoId = 1;
+        private static readonly List<Order> _order = new List<Order>();
 
         public OrderGameService(ILogger<OrderGameService> logger)
         {
             _logger = logger;
-            _order = new List<Order>();
         }
 
         public (bool Sucesso, string Mensagem, Order Order) Criar(Order order)
@@ -35,7 +35,8 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
                 Id = _proximoId++,
                 Price = order.Price,
                 UserId = order.UserId,  
-                GameId = order.GameId
+                GameId = order.GameId,
+                Status = OrderStatus.Rejected
             };
 
             _order.Add(novoOrder);
