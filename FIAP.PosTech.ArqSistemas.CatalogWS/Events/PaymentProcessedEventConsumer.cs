@@ -1,7 +1,4 @@
 ﻿using Confluent.Kafka;
-using FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs;
-using FIAP.PosTech.ArqSistemas.CatalogAPI.Enums;
-using FIAP.PosTech.ArqSistemas.CatalogAPI.Services;
 using System.Text.Json;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogWS.Events

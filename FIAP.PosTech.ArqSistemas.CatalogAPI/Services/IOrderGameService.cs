@@ -6,6 +6,12 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
     {
 
         /// <summary>
+        /// Obtém todos os pepidos de compra
+        /// </summary>
+        List<Order> ObterTodos();
+
+
+        /// <summary>
         /// Obtém um usuário pelo Id
         /// </summary>
         Order ObterPorId(int id);
@@ -14,5 +20,10 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
         /// Cria um novo pedido de compra para um jogo específico.
         /// </summary>
         (bool Sucesso, string Mensagem, Order Order) Criar(Order order);
+
+        /// <summary>
+        /// Aprovar um pedido pelo Id
+        /// </summary>
+        (bool Sucesso, string Mensagem) Aprovar(int id);
     }
 }

@@ -1,5 +1,6 @@
-﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
+﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Enums;
+using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
 {
@@ -58,6 +59,39 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
                 _logger.LogInformation("Pedido com Id {Id} encontrado: {Price}", id, order.Price);
             }
             return order;
+        }
+
+        public List<Order> ObterTodos()
+        {
+            _logger.LogInformation("Obtendo todos os pedidos. Total: {Total}", _order.Count);
+            return _order.ToList();
+        }
+
+        public (bool Sucesso, string Mensagem) Aprovar(int id)
+        {
+            var erros = new List<string>();
+
+            // Validar Id obrigatório
+            if (id <= 0)
+                erros.Add("Id deve ser um número positivo");
+
+            var pedidoExistente = _order.FirstOrDefault(o => o.Id == id);
+            if (pedidoExistente == null)
+            {
+                _logger.LogWarning("Erro ao aprovar: Pedido com Id {Id} não encontrado", id);
+                return (false, "Pedido não encontrado");
+            }
+          
+            if (erros.Count > 0)
+            {
+                var mensagem = string.Join("; ", erros);
+                _logger.LogWarning("Erro ao alterar jogo {Id}: {Erros}", id, mensagem);
+                return (false, mensagem);
+            }
+
+            pedidoExistente.Status = OrderStatus.Approved;
+            _logger.LogInformation("Pedido aprovado com sucesso. Id: {Id}, Status: {Status}", pedidoExistente.Id, pedidoExistente.Status);
+            return (true, "Pedido aprovado com sucesso");
         }
     }
 }
