@@ -1,4 +1,5 @@
-﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
+﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs;
+using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
 {
@@ -21,9 +22,10 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
         /// </summary>
         (bool Sucesso, string Mensagem, Order Order) Criar(Order order);
 
+
         /// <summary>
         /// Aprovar um pedido pelo Id
         /// </summary>
-        (bool Sucesso, string Mensagem) Aprovar(int id);
+        (bool Sucesso, string Mensagem, Order Order) Aprovar(int id);
     }
 }

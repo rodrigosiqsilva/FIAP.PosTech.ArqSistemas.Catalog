@@ -98,56 +98,6 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
             }
         }
 
-
-        /// <summary>
-        /// Aprovar um peçdido existente
-        /// </summary>
-        /// <param name="id">Id do pedido a ser aprovado (obrigatório)</param>
-        /// <returns>Resultado da aprovação</returns>
-        [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<ApiResponse<object?>> Aprovar(int id)
-        {
-            try
-            {
-                if (id <= 0)
-                {
-                    var errorResponse = ApiResponse<object?>.Erro("Id deve ser um número positivo", "Validação falhou");
-                    errorResponse.CorrelationId = GetCorrelationId();
-                    return BadRequest(errorResponse);
-                }
-
-                var (sucesso, mensagem) = _orderGameService.Aprovar(id);
-
-                if (!sucesso)
-                {
-                    if (mensagem == "Pedido não encontrado")
-                    {
-                        var notFoundResponse = ApiResponse<object?>.NotFound(mensagem);
-                        notFoundResponse.CorrelationId = GetCorrelationId();
-                        return NotFound(notFoundResponse);
-                    }
-
-                    var errorResponse = ApiResponse<object?>.Erro(mensagem, "Erro ao aprovar pedido");
-                    errorResponse.CorrelationId = GetCorrelationId();
-                    return BadRequest(errorResponse);
-                }
-
-                var response = ApiResponse<object?>.SucessoOk(null, mensagem);
-                response.CorrelationId = GetCorrelationId();
-                return Ok(response);    
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao aprovar pedido com Id {Id}", id);
-                var response = ApiResponse<object?>.Erro(ex.Message, "Erro ao aprovar pedido");
-                response.CorrelationId = GetCorrelationId();
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
-            }
-        }
-
         /// <summary>
         /// Cria um novo pedido de compra para um jogo específico. 
         /// </summary>
@@ -224,5 +174,58 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
         }
+
+        /// <summary>
+        /// Aprovar um pedido existente (partial update)
+        /// </summary>
+        /// <param name="id">Id do pedido a ser aprovado (obrigatório)</param>
+        /// <param name="orderAtualizado">Dados a serem atualizados. Todos os campos são opcionais - apenas os fornecidos serão alterados.</param>
+        /// <returns>Pedido aprovado</returns>
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<ApiResponse<Order>> Aprovar(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    var errorResponse = ApiResponse<Order>.Erro("Id deve ser um número positivo", "Validação falhou");
+                    errorResponse.CorrelationId = GetCorrelationId();
+                    return BadRequest(errorResponse);
+                }
+
+                var order = _orderGameService.ObterPorId(id);
+
+                if (order == null)
+                {
+                    var notFoundResponse = ApiResponse<Order>.NotFound($"Pedido com Id {id} não encontrado");
+                    notFoundResponse.CorrelationId = GetCorrelationId();
+                    return NotFound(notFoundResponse);
+                }
+
+                var (sucesso, mensagem, orderAprovado) = _orderGameService.Aprovar(id);
+
+                if (!sucesso)
+                {
+                    var errorResponse = ApiResponse<Order>.Erro(mensagem, "Erro ao aprovar pedido");
+                    errorResponse.CorrelationId = GetCorrelationId();
+                    return BadRequest(errorResponse);
+                }
+
+                var response = ApiResponse<Order>.SucessoOk(orderAprovado, mensagem);
+                response.CorrelationId = GetCorrelationId();
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao aprovar pedido com Id {Id}", id);
+                var response = ApiResponse<Order>.Erro(ex.Message, "Erro ao aprovar pedido");
+                response.CorrelationId = GetCorrelationId();
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+        }
+
     }
 }
