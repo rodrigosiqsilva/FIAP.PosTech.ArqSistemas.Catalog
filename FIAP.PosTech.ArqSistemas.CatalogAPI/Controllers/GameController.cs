@@ -13,7 +13,8 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
         private readonly IGameService _gameService;
         private readonly ILogger<GameController> _logger;
 
-        public GameController(IGameService gameService, ILogger<GameController> logger )
+
+        public GameController(IGameService gameService, ILogger<GameController> logger)
         {
             _gameService = gameService;
             _logger = logger;

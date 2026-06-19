@@ -13,14 +13,13 @@ builder.Logging.AddDebug();
 // Add services to the container.
 builder.Services.AddControllers();
 
-// CORREÇÃO: Mudado de Singleton para Scoped para evitar problemas de concorrência 
-// e conflito com o HttpClient (Transient/Scoped)
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IOrderGameService, OrderGameService>();
-builder.Services.AddSingleton<IOrderPlacedService, OrderPlacedService>();
+builder.Services.AddScoped<IOrderPlacedService, OrderPlacedService>();
+builder.Services.AddScoped<IBibliotecaUsuarioService, BibliotecaUsuarioService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddHttpClient();
 
-// Configura o HttpClient corretamente como Scoped/Transient por trás dos panos
-builder.Services.AddHttpClient<IUserService, UserService>();
 
 // Configure OpenAPI/Swagger
 builder.Services.AddEndpointsApiExplorer();

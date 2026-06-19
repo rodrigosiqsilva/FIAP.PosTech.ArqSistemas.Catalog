@@ -1,7 +1,7 @@
 ﻿using Confluent.Kafka;
 using System.Text.Json;
-using FIAP.PosTech.ArqSistemas.CatalogWS.DTOs;
 using FIAP.PosTech.ArqSistemas.CatalogWS.Services;
+using FIAP.PosTech.ArqSistemas.CatalogWS.DTOs;
 
 
 namespace FIAP.PosTech.ArqSistemas.CatalogWS.Events
@@ -15,13 +15,16 @@ namespace FIAP.PosTech.ArqSistemas.CatalogWS.Events
         private readonly string _topicName;
         private readonly IConfiguration _configuration;
         private readonly IOrderGameService _orderGameService;
+        private readonly IBibliotecaUsuarioService _bibliotecaUsuarioService;
 
         // Adicionamos IConfiguration no construtor
-        public PaymentProcessedEventConsumer(string bootstrapServers, string topicName, string groupId, IConfiguration configuration, IOrderGameService orderGameService)
+        public PaymentProcessedEventConsumer(string bootstrapServers, string topicName, string groupId, IConfiguration configuration, IOrderGameService orderGameService,
+                IBibliotecaUsuarioService bibliotecaUsuarioService)
         {
             _topicName = topicName;
             _configuration = configuration;
             _orderGameService = orderGameService;
+            _bibliotecaUsuarioService = bibliotecaUsuarioService;
 
             var config = new ConsumerConfig
             {
@@ -38,7 +41,6 @@ namespace FIAP.PosTech.ArqSistemas.CatalogWS.Events
         {
             _consumer.Subscribe(_topicName);
 
-            // Marcamos a Action como async para podermos usar o "await" lá embaixo no EmailService
             return Task.Run(async () =>
             {
                 try
@@ -75,7 +77,16 @@ namespace FIAP.PosTech.ArqSistemas.CatalogWS.Events
                                         Console.WriteLine($"Não foi encontrado registro do pedido para registro de aprovação e disponibilizá-lo na biblioteca do usuário! Usuário: {nome} | Jogo: {game} | Preço: {preco}");
                                     }
 
-                                    // Aprovar pedido e disponibilizar na biblioteca do usuário
+                                    var adcionarBiblioteca = await _bibliotecaUsuarioService.Adicionar(new Models.BibliotecaUsuario
+                                    {
+                                        IdGame = paymentProcessedEvent.Order.IdGame,
+                                        IdUser = paymentProcessedEvent.Order.IdUser
+                                    });
+
+                                    if (adcionarBiblioteca == null)
+                                    {
+                                        Console.WriteLine($"Não foi adicionar o jogo na biblioteca do usuário! Usuário: {nome} | Jogo: {game} | Preço: {preco}");
+                                    }
                                 }
                             }
                         }

@@ -16,7 +16,7 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
             _logger = logger;
         }
 
-        public (bool Sucesso, string Mensagem, Order Order) Aprovar(int id)
+        public (bool Sucesso, string Mensagem, Order Order) AlterarStatus(int id, OrderStatus newState)
         {
             var erros = new List<string>();
 
@@ -27,22 +27,22 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
             var orderExistente = _order.FirstOrDefault(o => o.Id == id);
             if (orderExistente == null)
             {
-                _logger.LogWarning("Erro ao aprovar: Pedido com Id {Id} não encontrado", id);
+                _logger.LogWarning("Erro ao alterar status: Pedido com Id {Id} não encontrado", id);
                 return (false, "Pedido não encontrado", null);
             }
 
             if (erros.Count > 0)
             {
                 var mensagem = string.Join("; ", erros);
-                _logger.LogWarning("Erro ao aprovar pedido {Id}: {Erros}", id, mensagem);
+                _logger.LogWarning("Erro ao alterar status do pedido {Id}: {Erros}", id, mensagem);
                 return (false, mensagem, null);
             }
 
-            orderExistente.Status = OrderStatus.Approved;
+            orderExistente.Status = newState;
 
-            _logger.LogInformation("Pedido aprovado com sucesso. Id: {Id}, Status: {Status}", orderExistente.Id, orderExistente.Status);
+            _logger.LogInformation("Status do pedido alterado com sucesso. Id: {Id}, Status: {Status}", orderExistente.Id, orderExistente.Status);
 
-            return (true, "Pedido aprovado com sucesso", orderExistente);
+            return (true, "Status do pedido alterado com sucesso", orderExistente);
         }
 
         public (bool Sucesso, string Mensagem, Order Order) Criar(Order order)

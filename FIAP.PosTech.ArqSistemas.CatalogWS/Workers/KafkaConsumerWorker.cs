@@ -8,13 +8,14 @@ namespace FIAP.PosTech.ArqSistemas.CatalogWS.Workers
     {
         private readonly PaymentProcessedEventConsumer _consumerPaymentProcessed;
 
-        public KafkaConsumerWorker(IConfiguration configuration, IOrderGameService orderGameService)
+        public KafkaConsumerWorker(IConfiguration configuration, IOrderGameService orderGameService, IBibliotecaUsuarioService bibliotecaUsuarioService)
         {
             var bootstrapServers = configuration["KafkaConfig:BootstrapServers"];
             var topicNamePaymentProcessed = configuration["KafkaConfig:TopicNamePaymentProcessed"];
             var groupId = configuration["KafkaConfig:GroupId"];
 
-            _consumerPaymentProcessed = new PaymentProcessedEventConsumer(bootstrapServers, topicNamePaymentProcessed, groupId, configuration, orderGameService);
+            _consumerPaymentProcessed = new PaymentProcessedEventConsumer(bootstrapServers, topicNamePaymentProcessed, groupId, 
+                    configuration, orderGameService, bibliotecaUsuarioService);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

@@ -6,8 +6,9 @@ using FIAP.PosTech.ArqSistemas.CatalogWS.Models;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogWS.Services
 {
-    public interface IOrderGameService
+    public interface IBibliotecaUsuarioService
     {
-        Task<ApiResponse<OrderDto>> GetOrderAsync(int orderId);
+        Task<ApiResponse<BibliotecaUsuario>> Adicionar(BibliotecaUsuario bibliotecaUsuario);
+
     }
 }

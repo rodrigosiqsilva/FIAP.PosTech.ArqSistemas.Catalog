@@ -1,4 +1,5 @@
-﻿namespace FIAP.PosTech.ArqSistemas.CatalogWS.Models
+﻿
+namespace FIAP.PosTech.ArqSistemas.CatalogWS.Models
 {
     public class ApiResponse<T>
     {

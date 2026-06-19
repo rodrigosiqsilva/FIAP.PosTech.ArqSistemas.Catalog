@@ -1,4 +1,5 @@
 ﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs;
+using FIAP.PosTech.ArqSistemas.CatalogAPI.Enums;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
@@ -24,8 +25,8 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
 
 
         /// <summary>
-        /// Aprovar um pedido pelo Id
+        /// Alterar o status de um pedido pelo Id
         /// </summary>
-        (bool Sucesso, string Mensagem, Order Order) Aprovar(int id);
+        (bool Sucesso, string Mensagem, Order Order) AlterarStatus(int id, OrderStatus newState);
     }
 }

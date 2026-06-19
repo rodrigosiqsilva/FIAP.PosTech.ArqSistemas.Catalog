@@ -7,6 +7,7 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
     {
 
         private readonly List<Game> _game;
+        private readonly List<Models.BibliotecaUsuario> _bibliotecaUsuarios;
         private readonly ILogger<GameService> _logger;
         private int _proximoId = 6;
 
@@ -14,6 +15,7 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
         {
             _logger = logger;
             _game = new List<Game>();
+            _bibliotecaUsuarios = new List<Models.BibliotecaUsuario>();
             InicializarDados();
         }
 
@@ -155,5 +157,6 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
 
             return (true, "Jogo excluído com sucesso");
         }
+
     }
 }

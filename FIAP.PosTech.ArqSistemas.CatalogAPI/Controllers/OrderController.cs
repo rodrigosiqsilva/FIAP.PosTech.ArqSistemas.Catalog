@@ -1,4 +1,5 @@
 ﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs;
+using FIAP.PosTech.ArqSistemas.CatalogAPI.Enums;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Services;
 using FIAP.PosTech.ArqSistemas.UserAPI.Services;
@@ -185,13 +186,20 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<ApiResponse<Order>> Aprovar(int id)
+        public ActionResult<ApiResponse<Order>> AlterarStatus(int id, OrderStatus newState)
         {
             try
             {
                 if (id <= 0)
                 {
                     var errorResponse = ApiResponse<Order>.Erro("Id deve ser um número positivo", "Validação falhou");
+                    errorResponse.CorrelationId = GetCorrelationId();
+                    return BadRequest(errorResponse);
+                }
+
+                if ((newState != OrderStatus.Approved) && (newState != OrderStatus.Rejected))
+                {
+                    var errorResponse = ApiResponse<Order>.Erro("Status do pedido inválido", "Validação falhou");
                     errorResponse.CorrelationId = GetCorrelationId();
                     return BadRequest(errorResponse);
                 }
@@ -205,11 +213,11 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
                     return NotFound(notFoundResponse);
                 }
 
-                var (sucesso, mensagem, orderAprovado) = _orderGameService.Aprovar(id);
+                var (sucesso, mensagem, orderAprovado) = _orderGameService.AlterarStatus(id, newState);
 
                 if (!sucesso)
                 {
-                    var errorResponse = ApiResponse<Order>.Erro(mensagem, "Erro ao aprovar pedido");
+                    var errorResponse = ApiResponse<Order>.Erro(mensagem, "Erro ao alterar status do pedido");
                     errorResponse.CorrelationId = GetCorrelationId();
                     return BadRequest(errorResponse);
                 }
@@ -220,8 +228,8 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao aprovar pedido com Id {Id}", id);
-                var response = ApiResponse<Order>.Erro(ex.Message, "Erro ao aprovar pedido");
+                _logger.LogError(ex, "Erro ao alterar status do pedido com Id {Id}", id);
+                var response = ApiResponse<Order>.Erro(ex.Message, "Erro ao alterar status do pedido");
                 response.CorrelationId = GetCorrelationId();
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
