@@ -10,11 +10,11 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["FIAP.PosTech.ArqSistemas.CatalogWS/FIAP.PosTech.ArqSistemas.CatalogWS.csproj", "FIAP.PosTech.ArqSistemas.CatalogWS/"]
-RUN dotnet restore "./FIAP.PosTech.ArqSistemas.CatalogWS/FIAP.PosTech.ArqSistemas.CatalogWS.csproj"
+COPY ["FIAP.PosTech.ArqSistemas.Catalog/FIAP.PosTech.ArqSistemas.CatalogWS/FIAP.PosTech.ArqSistemas.CatalogWS.csproj", "FIAP.PosTech.ArqSistemas.Catalog/FIAP.PosTech.ArqSistemas.CatalogWS/"]
+RUN dotnet restore "./FIAP.PosTech.ArqSistemas.Catalog/FIAP.PosTech.ArqSistemas.CatalogWS/FIAP.PosTech.ArqSistemas.CatalogWS.csproj"
 COPY . .
-WORKDIR "/src/FIAP.PosTech.ArqSistemas.CatalogWS"
-RUN dotnet build "./FIAP.PosTech.ArqSistemas.CatalogWS.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/FIAP.PosTech.ArqSistemas.Catalog/FIAP.PosTech.ArqSistemas.CatalogWS"
+RUN dotnet build "./FIAP.PosTech.ArqSistemas.CatalogWS.csproj" -c $BUILD_CONFIGURATION -o /app/build [cite: 5]
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
