@@ -14,7 +14,7 @@ COPY ["FIAP.PosTech.ArqSistemas.Catalog/FIAP.PosTech.ArqSistemas.CatalogWS/FIAP.
 RUN dotnet restore "./FIAP.PosTech.ArqSistemas.Catalog/FIAP.PosTech.ArqSistemas.CatalogWS/FIAP.PosTech.ArqSistemas.CatalogWS.csproj"
 COPY . .
 WORKDIR "/src/FIAP.PosTech.ArqSistemas.Catalog/FIAP.PosTech.ArqSistemas.CatalogWS"
-RUN dotnet build "./FIAP.PosTech.ArqSistemas.CatalogWS.csproj" -c $BUILD_CONFIGURATION -o /app/build [cite: 5]
+RUN dotnet build "./FIAP.PosTech.ArqSistemas.CatalogWS.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
