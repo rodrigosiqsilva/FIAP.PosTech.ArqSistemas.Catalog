@@ -15,9 +15,8 @@ spec:
         app: fiap-catalog-ws
     spec:
       containers:
-      - name: fiap-catalog-ws
-        # IMPORTANTE: Substitua pelo caminho real da sua imagem após fazer o build/push
-        image: sua-conta-docker/fiap-catalog-ws:latest 
+      - name: fiap-catalog-wssh
+        image: rodrigosiqsilva/fiap-catalog-ws:latest 
         imagePullPolicy: IfNotPresent
         resources:
           # Configuração de recursos padrão para um Worker Service em .NET

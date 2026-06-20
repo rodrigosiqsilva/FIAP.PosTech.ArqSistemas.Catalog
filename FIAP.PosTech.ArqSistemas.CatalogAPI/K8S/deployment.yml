@@ -16,8 +16,7 @@ spec:
     spec:
       containers:
       - name: fiap-catalog-api
-        # IMPORTANTE: Substitua pelo caminho real da sua imagem após fazer o build/push
-        image: sua-conta-docker/fiap-catalog-api:latest 
+        image: rodrigosiqsilva/fiap-catalog-api:latest 
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
