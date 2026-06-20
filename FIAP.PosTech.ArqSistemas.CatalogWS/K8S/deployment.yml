@@ -1,0 +1,35 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fiap-catalog-ws-deployment
+  labels:
+    app: fiap-catalog-ws
+spec:
+  replicas: 1 # Geralmente inicia-se com 1 para workers (evita consumo duplicado de filas se não houver concorrência tratada)
+  selector:
+    matchLabels:
+      app: fiap-catalog-ws
+  template:
+    metadata:
+      labels:
+        app: fiap-catalog-ws
+    spec:
+      containers:
+      - name: fiap-catalog-ws
+        # IMPORTANTE: Substitua pelo caminho real da sua imagem após fazer o build/push
+        image: sua-conta-docker/fiap-catalog-ws:latest 
+        imagePullPolicy: IfNotPresent
+        resources:
+          # Configuração de recursos padrão para um Worker Service em .NET
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "300m"
+        env:
+        - name: DOTNET_ENVIRONMENT
+          value: "Production"
+        # Se o seu worker precisar de conexões (mensageria, banco de dados), adicione-as aqui:
+        #- name: ConnectionStrings__DefaultConnection
+        #  value: "Sua_String_De_Conexao"
