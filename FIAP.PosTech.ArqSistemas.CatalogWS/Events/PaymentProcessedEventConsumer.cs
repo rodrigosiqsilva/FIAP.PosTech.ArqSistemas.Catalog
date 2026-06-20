@@ -58,7 +58,6 @@ namespace FIAP.PosTech.ArqSistemas.NotificationWS.Events
 
                             Console.WriteLine($"[Kafka] Mensagem recebida no tópico {_topicName}: {message}");
 
-
                             var paymentProcessedEvent = JsonSerializer.Deserialize<PaymentProcessedCreatedEvent>(message);
 
                             string nome = paymentProcessedEvent.Order.Usuario;
