@@ -12,8 +12,8 @@ EXPOSE 4041
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["FIAP.PosTech.ArqSistemas.CatalogAPI/FIAP.PosTech.ArqSistemas.CatalogAPI.csproj", "FIAP.PosTech.ArqSistemas.CatalogAPI/"]
-RUN dotnet restore "./FIAP.PosTech.ArqSistemas.CatalogAPI/FIAP.PosTech.ArqSistemas.CatalogAPI.csproj"
+COPY ["FIAP.PosTech.ArqSistemas.Catalog/FIAP.PosTech.ArqSistemas.CatalogAPI/FIAP.PosTech.ArqSistemas.CatalogAPI.csproj", "FIAP.PosTech.ArqSistemas.Catalog/FIAP.PosTech.ArqSistemas.CatalogAPI/"]
+RUN dotnet restore "./FIAP.PosTech.ArqSistemas.Catalog/FIAP.PosTech.ArqSistemas.CatalogAPI/FIAP.PosTech.ArqSistemas.CatalogAPI.csproj"
 COPY . .
 WORKDIR "/src/FIAP.PosTech.ArqSistemas.CatalogAPI"
 RUN dotnet build "./FIAP.PosTech.ArqSistemas.CatalogAPI.csproj" -c $BUILD_CONFIGURATION -o /app/build
