@@ -1,5 +1,5 @@
-﻿using FIAP.PosTech.ArqSistemas.CatalogWS.Events;
-using FIAP.PosTech.ArqSistemas.CatalogWS.Services;
+﻿using FIAP.PosTech.ArqSistemas.CatalogWS.Services;
+using FIAP.PosTech.ArqSistemas.NotificationWS.Events;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogWS.Workers
 {
@@ -8,7 +8,8 @@ namespace FIAP.PosTech.ArqSistemas.CatalogWS.Workers
         private readonly PaymentProcessedEventConsumer _consumerPaymentProcessed;
 
         // Injetamos o IServiceProvider em vez dos serviços Scoped diretamente
-        public KafkaConsumerWorker(IConfiguration configuration, IServiceProvider serviceProvider)
+        public KafkaConsumerWorker(IConfiguration configuration, IServiceProvider serviceProvider, IOrderGameService orderGameService, 
+                IBibliotecaUsuarioService bibliotecaUsuarioService)
         {
             var bootstrapServers = configuration["KafkaConfig:BootstrapServers"];
             var topicNamePaymentProcessed = configuration["KafkaConfig:TopicNamePaymentProcessed"];
@@ -19,7 +20,10 @@ namespace FIAP.PosTech.ArqSistemas.CatalogWS.Workers
                 bootstrapServers,
                 topicNamePaymentProcessed,
                 groupId,
-                serviceProvider);
+                configuration,  
+                orderGameService,
+                bibliotecaUsuarioService
+              );
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

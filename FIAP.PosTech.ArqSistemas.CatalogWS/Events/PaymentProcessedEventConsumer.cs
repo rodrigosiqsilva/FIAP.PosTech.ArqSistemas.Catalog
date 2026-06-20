@@ -61,7 +61,6 @@ namespace FIAP.PosTech.ArqSistemas.NotificationWS.Events
 
                             var paymentProcessedEvent = JsonSerializer.Deserialize<PaymentProcessedCreatedEvent>(message);
 
-
                             string nome = paymentProcessedEvent.Order.Usuario;
                             string game = paymentProcessedEvent.Order.Game;
                             decimal preco = paymentProcessedEvent.Order.Preco;
