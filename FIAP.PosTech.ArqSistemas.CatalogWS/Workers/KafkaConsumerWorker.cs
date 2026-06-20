@@ -1,5 +1,4 @@
-﻿
-using FIAP.PosTech.ArqSistemas.CatalogWS.Events;
+﻿using FIAP.PosTech.ArqSistemas.CatalogWS.Events;
 using FIAP.PosTech.ArqSistemas.CatalogWS.Services;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogWS.Workers
@@ -8,20 +7,24 @@ namespace FIAP.PosTech.ArqSistemas.CatalogWS.Workers
     {
         private readonly PaymentProcessedEventConsumer _consumerPaymentProcessed;
 
-        public KafkaConsumerWorker(IConfiguration configuration, IOrderGameService orderGameService, IBibliotecaUsuarioService bibliotecaUsuarioService)
+        // Injetamos o IServiceProvider em vez dos serviços Scoped diretamente
+        public KafkaConsumerWorker(IConfiguration configuration, IServiceProvider serviceProvider)
         {
             var bootstrapServers = configuration["KafkaConfig:BootstrapServers"];
             var topicNamePaymentProcessed = configuration["KafkaConfig:TopicNamePaymentProcessed"];
             var groupId = configuration["KafkaConfig:GroupId"];
 
-            _consumerPaymentProcessed = new PaymentProcessedEventConsumer(bootstrapServers, topicNamePaymentProcessed, groupId, 
-                    configuration, orderGameService, bibliotecaUsuarioService);
+            // Passamos o serviceProvider para o Consumer
+            _consumerPaymentProcessed = new PaymentProcessedEventConsumer(
+                bootstrapServers,
+                topicNamePaymentProcessed,
+                groupId,
+                serviceProvider);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             Console.WriteLine("[Worker] Iniciando o consumo de mensagens do Kafka...");
-
             await _consumerPaymentProcessed.StartConsumingAsync(stoppingToken);
         }
 
