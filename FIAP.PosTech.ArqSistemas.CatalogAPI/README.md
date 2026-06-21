@@ -39,6 +39,10 @@ Você precisará clonar o seguintes repositório do projeto:
 | :--- | :--- |
 | **Catalog API** | `https://github.com/rodrigosiqsilva/FIAP.PosTech.ArqSistemas.Catalog.git` |
 
+### Testes
+
+Para executar testes utilize o arquivo FIAP.PosTech.ArqSistemas.CatalogAPI.http presente na raiz do projeto, ele contém requisições pré-configuradas para testar os endpoints da API utilizando o recurso de HTTP Client do Visual Studio Code.
+
 ### 📂 Estrutura de Pastas Obrigatória
 Para que os arquivos de orquestração local (Docker Compose) referenciem os projetos corretamente, você **deve** respeitar a seguinte estrutura de diretórios no seu disco:
 
