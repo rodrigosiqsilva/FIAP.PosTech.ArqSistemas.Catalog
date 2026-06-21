@@ -1,4 +1,4 @@
-# FIAP.PosTech.ArqSistemas.CatalogWS.Worker
+# FIAP.PosTech.ArqSistemas.CatalogWS
 
 É serviço de background (**Worker Service**) desenvolvido em **.NET 8** projetado para processar de forma assíncrona os eventos de integração do ecossistema de jogos. 
 
