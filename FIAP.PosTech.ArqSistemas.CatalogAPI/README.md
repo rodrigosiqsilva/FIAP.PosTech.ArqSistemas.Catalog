@@ -39,9 +39,12 @@ Você precisará clonar o seguintes repositório do projeto:
 | :--- | :--- |
 | **Catalog API** | `https://github.com/rodrigosiqsilva/FIAP.PosTech.ArqSistemas.Catalog.git` |
 
-### Testes
+### 🧪 Estratégia de Testes rápidos (.http)
+Para fins de validação rápida sem necessidade de abrir a interface do navegador, o repositório disponibiliza o arquivo FIAP.PosTech.ArqSistemas.CatalogAPI.http na raiz do projeto.
 
-Para executar testes utilize o arquivo FIAP.PosTech.ArqSistemas.CatalogAPI.http presente na raiz do projeto, ele contém requisições pré-configuradas para testar os endpoints da API utilizando o recurso de HTTP Client do Visual Studio Code.
+Ele contém requisições HTTP pré-configuradas e prontas para execução utilizando o recurso de HTTP Client.
+
+Como usar: Abra o arquivo utilizando a extensão REST Client (no Visual Studio Code) ou a ferramenta nativa de HTTP Client do Visual Studio e clique em Send Request diretamente acima do endpoint desejado.
 
 ### 📂 Estrutura de Pastas Obrigatória
 Para que os arquivos de orquestração local (Docker Compose) referenciem os projetos corretamente, você **deve** respeitar a seguinte estrutura de diretórios no seu disco:
