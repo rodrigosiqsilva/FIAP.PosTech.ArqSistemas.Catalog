@@ -48,7 +48,7 @@ var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 // CORREÇÃO: Ordem correta do pipeline do ASP.NET Core
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseRouting(); // Importante para o Swagger e Controllers se acharem
 
@@ -57,7 +57,7 @@ app.UseCorrelationId(); // Seu middleware personalizado
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "FIAP Cloud Games (FCG) v1");
+    c.SwaggerEndpoint("./v1/swagger.json", "FIAP Cloud Games (FCG) v1");
     c.RoutePrefix = "swagger";
 });
 
