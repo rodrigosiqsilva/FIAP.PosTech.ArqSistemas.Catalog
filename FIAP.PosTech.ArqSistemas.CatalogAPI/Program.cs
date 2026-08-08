@@ -2,6 +2,9 @@ using FIAP.PosTech.ArqSistemas.CatalogAPI.Middlewares;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Services;
 using FIAP.PosTech.ArqSistemas.UserAPI.Services;
 using Microsoft.OpenApi;
+using Prometheus;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +23,19 @@ builder.Services.AddScoped<IBibliotecaUsuarioService, BibliotecaUsuarioService>(
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddHttpClient();
 
+// Configurar OpenTelemetry para Tracing
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracerProviderBuilder =>
+    {
+        tracerProviderBuilder
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("catalog-api"))
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddOtlpExporter(options =>
+            {
+                options.Endpoint = new Uri(Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") ?? "http://localhost:4317");
+            });
+    });
 
 // Configure OpenAPI/Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -47,8 +63,8 @@ var app = builder.Build();
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-// CORREÇÃO: Ordem correta do pipeline do ASP.NET Core
-//app.UseHttpsRedirection();
+// Habilitar métricas do Prometheus
+app.UseHttpMetrics();
 
 app.UseRouting(); // Importante para o Swagger e Controllers se acharem
 
@@ -64,6 +80,7 @@ app.UseSwaggerUI(c =>
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapMetrics(); // Expõe métricas em /metrics
 
 logger.LogInformation("Iniciando aplicação FIAP Cloud Games (FCG)");
 
