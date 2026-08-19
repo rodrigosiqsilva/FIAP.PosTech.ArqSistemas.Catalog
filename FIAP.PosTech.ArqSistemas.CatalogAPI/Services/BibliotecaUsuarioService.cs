@@ -1,43 +1,30 @@
-﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
+using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
+using MongoDB.Driver;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
 {
     public class BibliotecaUsuarioService: IBibliotecaUsuarioService
     {
-
-        private static readonly List<BibliotecaUsuario> _bibliotecaUsuarios = new List<BibliotecaUsuario>();
+        private readonly IMongoCollection<BibliotecaUsuario> _bibliotecaCollection;
         private readonly ILogger<BibliotecaUsuarioService> _logger;
 
-        public BibliotecaUsuarioService(ILogger<BibliotecaUsuarioService> logger)
+        public BibliotecaUsuarioService(IMongoDatabase database, ILogger<BibliotecaUsuarioService> logger)
         {
             _logger = logger;
+            _bibliotecaCollection = database.GetCollection<BibliotecaUsuario>("BibliotecaUsuarios");
         }
 
         public async Task<List<BibliotecaUsuario>> ObterBibliotecaUsuario(int idUser)
         {
-            var biblioteca = _bibliotecaUsuarios.Where(b => b.IdUser == idUser).ToList();
-            if (biblioteca == null)
-            {
-                _logger.LogWarning("Biblioteca do usuário com Id {IdUser} não encontrada", idUser);
-            }
-            else
-            {
-                _logger.LogInformation("Biblioteca do usuário com Id {IdUser} encontrada", idUser);
-            }
+            var biblioteca = await _bibliotecaCollection.Find(b => b.IdUser == idUser).ToListAsync();
+            _logger.LogInformation("Biblioteca do usuário com Id {IdUser} obtida do MongoDB. Total: {Count}", idUser, biblioteca.Count);
             return biblioteca;
         }
 
         public async Task<List<BibliotecaUsuario>> ObterBibliotecaJogo(int idGame)
         {
-            var biblioteca = _bibliotecaUsuarios.Where(b => b.IdGame == idGame).ToList();
-            if (biblioteca == null)
-            {
-                _logger.LogWarning("Biblioteca do jogo com Id {IdGame} não encontrada", idGame);
-            }
-            else
-            {
-                _logger.LogInformation("Biblioteca do jogo com Id {IdGame} encontrada", idGame);
-            }
+            var biblioteca = await _bibliotecaCollection.Find(b => b.IdGame == idGame).ToListAsync();
+            _logger.LogInformation("Biblioteca do jogo com Id {IdGame} obtida do MongoDB. Total: {Count}", idGame, biblioteca.Count);
             return biblioteca;
         }
           
@@ -65,8 +52,8 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
                 IdUser = idUser
             };
 
-            _bibliotecaUsuarios.Add(novoJogoBiblioteca);
-            _logger.LogInformation("Jogo adicionado à biblioteca do usuário {IdUser} com sucesso. IdGame: {IdGame}", idUser, idGame);
+            _bibliotecaCollection.InsertOne(novoJogoBiblioteca);
+            _logger.LogInformation("Jogo adicionado à biblioteca do usuário {IdUser} com sucesso no MongoDB. IdGame: {IdGame}", idUser, idGame);
 
             return (true, "Jogo adicionado à biblioteca com sucesso", novoJogoBiblioteca);
         }

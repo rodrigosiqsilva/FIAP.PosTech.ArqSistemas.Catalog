@@ -5,6 +5,7 @@ using Microsoft.OpenApi;
 using Prometheus;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,21 @@ builder.Logging.AddDebug();
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// Configurar MongoDB Client e Database
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var connectionString = builder.Configuration["MongoDbSettings:ConnectionString"] 
+        ?? "mongodb://admin:adminpassword@localhost:27017";
+    return new MongoClient(connectionString);
+});
+
+builder.Services.AddScoped<IMongoDatabase>(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    var databaseName = builder.Configuration["MongoDbSettings:DatabaseName"] ?? "CatalogDb";
+    return client.GetDatabase(databaseName);
+});
 
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IOrderGameService, OrderGameService>();

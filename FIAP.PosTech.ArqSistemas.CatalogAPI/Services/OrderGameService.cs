@@ -1,19 +1,19 @@
-﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs;
+using FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Enums;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
+using MongoDB.Driver;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
 {
     public class OrderGameService : IOrderGameService     
     {
-
+        private readonly IMongoCollection<Order> _orderCollection;
         private readonly ILogger<OrderGameService> _logger;
-        private static int _proximoId = 1;
-        private static readonly List<Order> _order = new List<Order>();
 
-        public OrderGameService(ILogger<OrderGameService> logger)
+        public OrderGameService(IMongoDatabase database, ILogger<OrderGameService> logger)
         {
             _logger = logger;
+            _orderCollection = database.GetCollection<Order>("Orders");
         }
 
         public (bool Sucesso, string Mensagem, Order Order) AlterarStatus(int id, OrderStatus newState)
@@ -24,10 +24,10 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
             if (id <= 0)
                 erros.Add("Id deve ser um número positivo");
 
-            var orderExistente = _order.FirstOrDefault(o => o.Id == id);
+            var orderExistente = _orderCollection.Find(o => o.Id == id).FirstOrDefault();
             if (orderExistente == null)
             {
-                _logger.LogWarning("Erro ao alterar status: Pedido com Id {Id} não encontrado", id);
+                _logger.LogWarning("Erro ao alterar status: Pedido com Id {Id} não encontrado no MongoDB", id);
                 return (false, "Pedido não encontrado", null);
             }
 
@@ -39,8 +39,9 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
             }
 
             orderExistente.Status = newState;
+            _orderCollection.ReplaceOne(o => o.Id == id, orderExistente);
 
-            _logger.LogInformation("Status do pedido alterado com sucesso. Id: {Id}, Status: {Status}", orderExistente.Id, orderExistente.Status);
+            _logger.LogInformation("Status do pedido alterado com sucesso no MongoDB. Id: {Id}, Status: {Status}", orderExistente.Id, orderExistente.Status);
 
             return (true, "Status do pedido alterado com sucesso", orderExistente);
         }
@@ -59,18 +60,24 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
                 return (false, mensagem, null);
             }
 
+            var maxOrder = _orderCollection.Find(FilterDefinition<Order>.Empty)
+                .SortByDescending(o => o.Id)
+                .FirstOrDefault();
+
+            int proximoId = maxOrder != null ? maxOrder.Id + 1 : 1;
+
             // Criar novo pedido com Id gerado
             var novoOrder = new Order
             {
-                Id = _proximoId++,
+                Id = proximoId,
                 Price = order.Price,
                 UserId = order.UserId,  
                 GameId = order.GameId,
                 Status = OrderStatus.Rejected
             };
 
-            _order.Add(novoOrder);
-            _logger.LogInformation("Pedido criado com sucesso. Id: {Id}, Price: {Price}, UserId: {UserId}, GameId: {GameId}",
+            _orderCollection.InsertOne(novoOrder);
+            _logger.LogInformation("Pedido criado no MongoDB com sucesso. Id: {Id}, Price: {Price}, UserId: {UserId}, GameId: {GameId}",
                 novoOrder.Id, novoOrder.Price, novoOrder.UserId, novoOrder.GameId);
 
             return (true, "Pedido criado com sucesso", novoOrder);
@@ -78,22 +85,23 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
 
         public Order ObterPorId(int id)
         {
-            var order = _order.FirstOrDefault(c => c.Id == id);
+            var order = _orderCollection.Find(c => c.Id == id).FirstOrDefault();
             if (order == null)
             {
-                _logger.LogWarning("Pedido com Id {Id} não encontrado", id);
+                _logger.LogWarning("Pedido com Id {Id} não encontrado no MongoDB", id);
             }
             else
             {
-                _logger.LogInformation("Pedido com Id {Id} encontrado: {Price}", id, order.Price);
+                _logger.LogInformation("Pedido com Id {Id} encontrado no MongoDB: {Price}", id, order.Price);
             }
             return order;
         }
 
         public List<Order> ObterTodos()
         {
-            _logger.LogInformation("Obtendo todos os pedidos. Total: {Total}", _order.Count);
-            return _order.ToList();
+            var orders = _orderCollection.Find(FilterDefinition<Order>.Empty).ToList();
+            _logger.LogInformation("Obtendo todos os pedidos do MongoDB. Total: {Total}", orders.Count);
+            return orders;
         }
 
     }

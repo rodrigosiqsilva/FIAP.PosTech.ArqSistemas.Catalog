@@ -1,57 +1,65 @@
-﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs;
+using FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
+using MongoDB.Driver;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
 {
     public class GameService : IGameService
     {
-
-        private readonly List<Game> _game;
-        private readonly List<Models.BibliotecaUsuario> _bibliotecaUsuarios;
+        private readonly IMongoCollection<Game> _gameCollection;
         private readonly ILogger<GameService> _logger;
-        private int _proximoId = 6;
 
-        public GameService(ILogger<GameService> logger)
+        public GameService(IMongoDatabase database, ILogger<GameService> logger)
         {
             _logger = logger;
-            _game = new List<Game>();
-            _bibliotecaUsuarios = new List<Models.BibliotecaUsuario>();
+            _gameCollection = database.GetCollection<Game>("Games");
             InicializarDados();
         }
 
         /// <summary>
-        /// Inicializa 5 registros fictícios para testes
+        /// Inicializa 5 registros fictícios para testes se a coleção estiver vazia
         /// </summary>
         private void InicializarDados()
         {
-            _game.AddRange(new[]
+            try
             {
-                new Game { Id = 1, Nome = "Minecraft", Preco = 100.00m, Ativo = true },
-                new Game { Id = 2, Nome = "Grand Theft Auto V", Preco = 200.00m, Ativo = true },
-                new Game { Id = 3, Nome = "EA SPORTS FC 26", Preco = 150.00m, Ativo = true },
-                new Game { Id = 4, Nome = "Forza Horizon 5", Preco = 300.00m, Ativo = true },
-                new Game { Id = 5, Nome = "Destiny 2", Preco = 250.00m, Ativo = true }
-            });
-
-            _logger.LogInformation("Dados iniciais de jogos carregados com sucesso. Total de registros: {TotalRegistros}", _game.Count);
+                if (_gameCollection.CountDocuments(FilterDefinition<Game>.Empty) == 0)
+                {
+                    var jogosIniciais = new List<Game>
+                    {
+                        new Game { Id = 1, Nome = "Minecraft", Preco = 100.00m, Ativo = true },
+                        new Game { Id = 2, Nome = "Grand Theft Auto V", Preco = 200.00m, Ativo = true },
+                        new Game { Id = 3, Nome = "EA SPORTS FC 26", Preco = 150.00m, Ativo = true },
+                        new Game { Id = 4, Nome = "Forza Horizon 5", Preco = 300.00m, Ativo = true },
+                        new Game { Id = 5, Nome = "Destiny 2", Preco = 250.00m, Ativo = true }
+                    };
+                    _gameCollection.InsertMany(jogosIniciais);
+                    _logger.LogInformation("Dados iniciais de jogos carregados com sucesso no MongoDB. Total de registros: {TotalRegistros}", jogosIniciais.Count);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao inicializar dados de jogos no MongoDB");
+            }
         }
 
         public List<Game> ObterTodos()
         {
-            _logger.LogInformation("Obtendo todos os jogos. Total: {Total}", _game.Count);
-            return _game.ToList();
+            var list = _gameCollection.Find(FilterDefinition<Game>.Empty).ToList();
+            _logger.LogInformation("Obtendo todos os jogos do MongoDB. Total: {Total}", list.Count);
+            return list;
         }
 
         public async Task<Game> ObterPorId(int id)
         {
-            var game = _game.FirstOrDefault(c => c.Id == id);
+            var game = await _gameCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
             if (game == null)
             {
-                _logger.LogWarning("Jogo com Id {Id} não encontrado", id);
+                _logger.LogWarning("Jogo com Id {Id} não encontrado no MongoDB", id);
             }
             else
             {
-                _logger.LogInformation("Jogo com Id {Id} encontrado: {Nome}", id, game.Nome);
+                _logger.LogInformation("Jogo com Id {Id} encontrado no MongoDB: {Nome}", id, game.Nome);
             }
             return game;
         }
@@ -74,17 +82,23 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
                 return (false, mensagem, null);
             }
 
+            var maxIdGame = _gameCollection.Find(FilterDefinition<Game>.Empty)
+                .SortByDescending(g => g.Id)
+                .FirstOrDefault();
+
+            int proximoId = maxIdGame != null ? maxIdGame.Id + 1 : 1;
+
             // Criar novo jogo com Id gerado
             var novoGame = new Game
             {
-                Id = _proximoId++,
+                Id = proximoId,
                 Nome = game.Nome.Trim(),
                 Preco = game.Preco,
                 Ativo = game.Ativo   
             };
 
-            _game.Add(novoGame);
-            _logger.LogInformation("Jogo criado com sucesso. Id: {Id}, Nome: {Nome}, Preco: {Preco}",
+            _gameCollection.InsertOne(novoGame);
+            _logger.LogInformation("Jogo criado no MongoDB com sucesso. Id: {Id}, Nome: {Nome}, Preco: {Preco}",
                 novoGame.Id, novoGame.Nome, novoGame.Preco);
 
             return (true, "Jogo criado com sucesso", novoGame);
@@ -98,10 +112,10 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
             if (id <= 0)
                 erros.Add("Id deve ser um número positivo");
 
-            var gameExistente = _game.FirstOrDefault(g => g.Id == id);
+            var gameExistente = _gameCollection.Find(g => g.Id == id).FirstOrDefault();
             if (gameExistente == null)
             {
-                _logger.LogWarning("Erro ao alterar: Jogo com Id {Id} não encontrado", id);
+                _logger.LogWarning("Erro ao alterar: Jogo com Id {Id} não encontrado no MongoDB", id);
                 return (false, "Jogo não encontrado", null);
             }
 
@@ -133,7 +147,8 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
                 return (false, mensagem, null);
             }
 
-            _logger.LogInformation("Jogo alterado com sucesso. Id: {Id}, Nome: {Nome}, Preco: {Preco}, Ativo: {Ativo}",
+            _gameCollection.ReplaceOne(g => g.Id == id, gameExistente);
+            _logger.LogInformation("Jogo alterado no MongoDB com sucesso. Id: {Id}, Nome: {Nome}, Preco: {Preco}, Ativo: {Ativo}",
                 gameExistente.Id, gameExistente.Nome, gameExistente.Preco, gameExistente.Ativo);
 
             return (true, "Jogo alterado com sucesso", gameExistente);
@@ -145,15 +160,14 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
             if (id <= 0)
                 return (false, "Id deve ser um número positivo");
 
-            var gameExistente = _game.FirstOrDefault(g => g.Id == id);
-            if (gameExistente == null)
+            var result = _gameCollection.DeleteOne(g => g.Id == id);
+            if (result.DeletedCount == 0)
             {
-                _logger.LogWarning("Erro ao excluir: Jogo com Id {Id} não encontrado", id);
+                _logger.LogWarning("Erro ao excluir: Jogo com Id {Id} não encontrado no MongoDB", id);
                 return (false, "Jogo não encontrado");
             }
 
-            _game.Remove(gameExistente);
-            _logger.LogInformation("Jogo excluído com sucesso. Id: {Id}, Nome: {Nome}", id, gameExistente.Nome);
+            _logger.LogInformation("Jogo excluído do MongoDB com sucesso. Id: {Id}", id);
 
             return (true, "Jogo excluído com sucesso");
         }
