@@ -20,7 +20,7 @@ POST {{HostAddress}}/api/game
 Content-Type: application/json
 X-Correlation-Id: test-003
 {
-  "nome": " Free Fire",
+  "nome": "Free Fire",
   "preco": 59.99,
   "ativo": true
 }
