@@ -32,6 +32,14 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
     return client.GetDatabase(databaseName);
 });
 
+// Configurar Redis Cache Distribuído
+// StackExchange.Redis
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration["RedisSettings:ConnectionString"] ?? "localhost:6379";
+    options.InstanceName = "CatalogAPI:";
+});
+
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IOrderGameService, OrderGameService>();
 builder.Services.AddScoped<IOrderPlacedService, OrderPlacedService>();

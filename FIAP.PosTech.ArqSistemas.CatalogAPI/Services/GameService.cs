@@ -1,5 +1,7 @@
+using System.Text.Json;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
+using Microsoft.Extensions.Caching.Distributed;
 using MongoDB.Driver;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
@@ -8,10 +10,12 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
     {
         private readonly IMongoCollection<Game> _gameCollection;
         private readonly ILogger<GameService> _logger;
+        private readonly IDistributedCache _cache;
 
-        public GameService(IMongoDatabase database, ILogger<GameService> logger)
+        public GameService(IMongoDatabase database, ILogger<GameService> logger, IDistributedCache cache)
         {
             _logger = logger;
+            _cache = cache;
             _gameCollection = database.GetCollection<Game>("Games");
             InicializarDados();
         }
@@ -50,17 +54,51 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
             return list;
         }
 
-        public async Task<Game> ObterPorId(int id)
+        public async Task<Game?> ObterPorId(int id)
         {
+            var cacheKey = $"game:{id}";
+
+            // 1. Tenta obter do Cache (Redis)
+            try
+            {
+                var cachedGame = await _cache.GetStringAsync(cacheKey);
+                if (!string.IsNullOrEmpty(cachedGame))
+                {
+                    _logger.LogInformation("Jogo com Id {Id} obtido do CACHE (Redis)", id);
+                    return JsonSerializer.Deserialize<Game>(cachedGame);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Falha ao consultar Redis para a chave {CacheKey}. Buscando no MongoDB.", cacheKey);
+            }
+
+            // 2. Não está no cache -> Consulta o MongoDB
             var game = await _gameCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
             if (game == null)
             {
                 _logger.LogWarning("Jogo com Id {Id} não encontrado no MongoDB", id);
+                return null;
             }
-            else
+
+            _logger.LogInformation("Jogo com Id {Id} encontrado no MongoDB: {Nome}. Gravando no CACHE (Redis)...", id, game.Nome);
+
+            // 3. Salva no Cache com expiração de 15 minutos
+            try
             {
-                _logger.LogInformation("Jogo com Id {Id} encontrado no MongoDB: {Nome}", id, game.Nome);
+                var cacheOptions = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15)
+                };
+
+                var serializedGame = JsonSerializer.Serialize(game);
+                await _cache.SetStringAsync(cacheKey, serializedGame, cacheOptions);
             }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Falha ao gravar jogo {Id} no Cache (Redis)", id);
+            }
+
             return game;
         }
 
@@ -148,6 +186,10 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
             }
 
             _gameCollection.ReplaceOne(g => g.Id == id, gameExistente);
+            
+            // Invalida o cache
+            try { _cache.Remove($"game:{id}"); } catch { /* Ignora se cache offline */ }
+
             _logger.LogInformation("Jogo alterado no MongoDB com sucesso. Id: {Id}, Nome: {Nome}, Preco: {Preco}, Ativo: {Ativo}",
                 gameExistente.Id, gameExistente.Nome, gameExistente.Preco, gameExistente.Ativo);
 
@@ -166,6 +208,9 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
                 _logger.LogWarning("Erro ao excluir: Jogo com Id {Id} não encontrado no MongoDB", id);
                 return (false, "Jogo não encontrado");
             }
+
+            // Invalida o cache
+            try { _cache.Remove($"game:{id}"); } catch { /* Ignora se cache offline */ }
 
             _logger.LogInformation("Jogo excluído do MongoDB com sucesso. Id: {Id}", id);
 
