@@ -1,4 +1,4 @@
-﻿using FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs;
+using FIAP.PosTech.ArqSistemas.CatalogAPI.DTOs;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
 
 namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
@@ -30,5 +30,10 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
         /// Exclui um jogo pelo Id
         /// </summary>
         (bool Sucesso, string Mensagem) Excluir(int id);
+
+        /// <summary>
+        /// Realiza busca avançada de jogos via Elasticsearch com tolerância a erros (Fuzzy) e ordenação por relevância
+        /// </summary>
+        Task<List<GameSearchResponseDto>> BuscarAvancadaAsync(string termo);
     }
 }

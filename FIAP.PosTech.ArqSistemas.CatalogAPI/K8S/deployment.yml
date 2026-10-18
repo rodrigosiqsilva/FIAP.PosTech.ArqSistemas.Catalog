@@ -1,11 +1,16 @@
-﻿apiVersion: apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fiap-catalog-api-deployment
   labels:
     app: fiap-catalog-api
 spec:
-  replicas: 2 # Define a quantidade de réplicas/pods desejada
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: fiap-catalog-api
@@ -16,27 +21,36 @@ spec:
     spec:
       containers:
       - name: fiap-catalog-api
-        image: rodrigosiqsilva/fiap-catalog-api:latest 
-        imagePullPolicy: IfNotPresent
+        image: fiap-catalog-api:latest
+        imagePullPolicy: Always
         ports:
         - name: http
           containerPort: 4040
-        - name: https
-          containerPort: 4041
         resources:
-          # Define limites de recursos recomendados para uma aplicação .NET padrão
           requests:
             memory: "256Mi"
-            cpu: "250m"
+            cpu: "200m"
           limits:
             memory: "512Mi"
             cpu: "500m"
         env:
         - name: DOTNET_ENVIRONMENT
           value: "Production"
-        # O ASPNETCORE_URLS garante que a aplicação escute nas portas expostas pelo Dockerfile
         - name: ASPNETCORE_URLS
-          value: "http://+:4040;https://+:4041" 
+          value: "http://+:4040"
+        - name: MongoDbSettings__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: connection-string
+        - name: MongoDbSettings__DatabaseName
+          value: "FCGDatabase"
+        - name: RedisSettings__ConnectionString
+          value: "redis-service:6379"
+        - name: ElasticsearchSettings__Uri
+          value: "http://elasticsearch-service:9200"
+        - name: ElasticsearchSettings__DefaultIndex
+          value: "games"
 
 ---
 
@@ -47,13 +61,10 @@ metadata:
   labels:
     app: fiap-catalog-api
 spec:
-  type: ClusterIP # Altere para LoadBalancer se precisar expor diretamente para a internet
+  type: LoadBalancer
   selector:
     app: fiap-catalog-api
   ports:
   - name: http
-    port: 4040
+    port: 80
     targetPort: 4040
-  - name: https
-    port: 4041
-    targetPort: 4041

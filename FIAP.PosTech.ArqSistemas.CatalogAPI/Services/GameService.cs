@@ -11,11 +11,13 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
         private readonly IMongoCollection<Game> _gameCollection;
         private readonly ILogger<GameService> _logger;
         private readonly IDistributedCache _cache;
+        private readonly IGameSearchService _searchService;
 
-        public GameService(IMongoDatabase database, ILogger<GameService> logger, IDistributedCache cache)
+        public GameService(IMongoDatabase database, ILogger<GameService> logger, IDistributedCache cache, IGameSearchService searchService)
         {
             _logger = logger;
             _cache = cache;
+            _searchService = searchService;
             _gameCollection = database.GetCollection<Game>("Games");
             InicializarDados();
         }
@@ -39,6 +41,7 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
                     };
                     _gameCollection.InsertMany(jogosIniciais);
                     _logger.LogInformation("Dados iniciais de jogos carregados com sucesso no MongoDB. Total de registros: {TotalRegistros}", jogosIniciais.Count);
+                    _ = _searchService.IndexarMuitosAsync(jogosIniciais);
                 }
             }
             catch (Exception ex)
@@ -136,6 +139,8 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
             };
 
             _gameCollection.InsertOne(novoGame);
+            _ = _searchService.IndexarAsync(novoGame);
+
             _logger.LogInformation("Jogo criado no MongoDB com sucesso. Id: {Id}, Nome: {Nome}, Preco: {Preco}",
                 novoGame.Id, novoGame.Nome, novoGame.Preco);
 
@@ -186,6 +191,7 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
             }
 
             _gameCollection.ReplaceOne(g => g.Id == id, gameExistente);
+            _ = _searchService.AtualizarAsync(gameExistente);
             
             // Invalida o cache
             try { _cache.Remove($"game:{id}"); } catch { /* Ignora se cache offline */ }
@@ -209,12 +215,19 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Services
                 return (false, "Jogo não encontrado");
             }
 
+            _ = _searchService.RemoverAsync(id);
+
             // Invalida o cache
             try { _cache.Remove($"game:{id}"); } catch { /* Ignora se cache offline */ }
 
             _logger.LogInformation("Jogo excluído do MongoDB com sucesso. Id: {Id}", id);
 
             return (true, "Jogo excluído com sucesso");
+        }
+
+        public async Task<List<GameSearchResponseDto>> BuscarAvancadaAsync(string termo)
+        {
+            return await _searchService.BuscarAsync(termo);
         }
 
     }

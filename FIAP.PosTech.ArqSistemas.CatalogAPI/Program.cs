@@ -6,6 +6,7 @@ using Prometheus;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using MongoDB.Driver;
+using Elastic.Clients.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,9 +29,21 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 builder.Services.AddScoped<IMongoDatabase>(sp =>
 {
     var client = sp.GetRequiredService<IMongoClient>();
-    var databaseName = builder.Configuration["MongoDbSettings:DatabaseName"] ?? "CatalogDb";
+    var databaseName = builder.Configuration["MongoDbSettings:DatabaseName"] ?? "FCGDatabase";
     return client.GetDatabase(databaseName);
 });
+
+// Configurar Elasticsearch Client
+builder.Services.AddSingleton<ElasticsearchClient>(sp =>
+{
+    var uri = builder.Configuration["ElasticsearchSettings:Uri"] ?? "http://localhost:9200";
+    var defaultIndex = builder.Configuration["ElasticsearchSettings:DefaultIndex"] ?? "games";
+    var settings = new ElasticsearchClientSettings(new Uri(uri))
+        .DefaultIndex(defaultIndex);
+    return new ElasticsearchClient(settings);
+});
+
+builder.Services.AddScoped<IGameSearchService, GameSearchService>();
 
 // Configurar Redis Cache Distribuído
 // StackExchange.Redis

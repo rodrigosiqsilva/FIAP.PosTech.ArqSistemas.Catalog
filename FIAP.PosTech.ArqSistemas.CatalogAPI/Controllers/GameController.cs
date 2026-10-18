@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Models;
 using FIAP.PosTech.ArqSistemas.CatalogAPI.Services;
@@ -233,6 +233,34 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
             {
                 _logger.LogError(ex, "Erro ao excluir jogo com Id {Id}", id);
                 var response = ApiResponse<object?>.Erro(ex.Message, "Erro ao excluir jogo");
+                response.CorrelationId = GetCorrelationId();
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+        }
+
+        /// <summary>
+        /// Busca avançada de jogos utilizando Elasticsearch com Fuzzy Search (tolerância a erros) e ordenação por relevância
+        /// </summary>
+        /// <param name="termo">Termo a ser pesquisado (ex.: nome do jogo mesmo com erro de digitação)</param>
+        /// <returns>Lista de jogos encontrados ordenados por relevância</returns>
+        [HttpGet("search")]
+        [HttpGet("/search")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<GameSearchResponseDto>>>> BuscarAvancada([FromQuery] string termo)
+        {
+            try
+            {
+                var resultados = await _gameService.BuscarAvancadaAsync(termo);
+                var response = ApiResponse<List<GameSearchResponseDto>>.SucessoList(
+                    resultados, 
+                    $"Total de {resultados.Count} jogos encontrados via busca avançada (Elasticsearch)");
+                response.CorrelationId = GetCorrelationId();
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao realizar busca avançada no Elasticsearch para o termo '{Termo}'", termo);
+                var response = ApiResponse<List<GameSearchResponseDto>>.Erro(ex.Message, "Erro ao realizar busca avançada");
                 response.CorrelationId = GetCorrelationId();
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
