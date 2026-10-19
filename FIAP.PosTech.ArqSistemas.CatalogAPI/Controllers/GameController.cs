@@ -265,5 +265,21 @@ namespace FIAP.PosTech.ArqSistemas.CatalogAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
         }
+
+        /// <summary>
+        /// Endpoint de demonstração de CI/CD (GitHub Actions -> Amazon ECR -> Amazon EKS)
+        /// </summary>
+        [HttpGet("hello-world")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public IActionResult HelloWorld()
+        {
+            return Ok(new
+            {
+                Mensagem = "Hello World! Deploy automatizado via GitHub Actions no Amazon EKS funcionando com sucesso!",
+                Ambiente = Environment.MachineName,
+                DataHoraUtc = DateTime.UtcNow
+            });
+        }
     }
 }
+
